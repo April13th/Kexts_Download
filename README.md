@@ -5,8 +5,10 @@
 ### 1、Python 版本 3.X
  python -V
 ### 2、pip 插件 requests 和 pyperclip
+```
  python -m pip install requests
  python -m pip install pyperclip
+```
 ### 3、下载工具：迅雷，wget，aria2 至少有一个
 ## 说明：
 ### 1、默认使用迅雷下载，使用迅雷下载是调用迅雷，然后迅雷访问剪切板。
