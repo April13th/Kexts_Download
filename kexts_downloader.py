@@ -9,7 +9,6 @@ pip 插件 requests 和 pyperclip
 2、手动输入当前 OpenCore 的版本，请输入正确格式，默认为 0.6.2，可手动更改。
 3、可修改下载目录。
 4、下载的 kext 是根据 dict_url 字典里的数据下载，请自行添加或修改。
-5、无法下载里，可能是 kext 名字不同，可在 alias_kext_name 里设置。
 '''
 #import os
 import subprocess
@@ -32,43 +31,21 @@ base_url = 'https://github.com'
 '''
 dict_url = {
     'OpenCore': 'https://github.com/acidanthera/OpenCorePkg/releases/latest',
-    'AirportBrcmFixup': 'https://github.com/acidanthera/AirportBrcmFixup/releases',
-    'AppleALC': 'https://github.com/acidanthera/AppleALC/releases',
-    'BrcmPatchRAM': 'https://github.com/acidanthera/BrcmPatchRAM/releases',
-    'BT4LEContinuityFixup': 'https://github.com/acidanthera/BT4LEContinuityFixup/releases',
-    'HibernationFixup': 'https://github.com/acidanthera/HibernationFixup/releases',
-    'Lilu': 'https://github.com/acidanthera/Lilu/releases',
-    'NoTouchID': 'https://github.com/al3xtjames/NoTouchID/releases',
-    'PS2Controller': 'https://github.com/acidanthera/VoodooPS2/releases',
-    'RealtekRTL8111': 'https://github.com/Mieze/RTL8111_driver_for_OS_X/releases',
-    'USBInjectAll': 'https://github.com/Sniki/OS-X-USB-Inject-All/releases',
-    'VirtualSMC': 'https://github.com/acidanthera/VirtualSMC/releases',
-    'WhateverGreen': 'https://github.com/acidanthera/WhateverGreen/releases',
+    'Lilu': 'https://github.com/acidanthera/Lilu/releases/latest',
+    'VirtualSMC': 'https://github.com/acidanthera/VirtualSMC/releases/latest',
+    'AppleALC': 'https://github.com/acidanthera/AppleALC/releases/latest',
+    'WhateverGreen': 'https://github.com/acidanthera/WhateverGreen/releases/latest',
+    'AirportBrcmFixup': 'https://github.com/acidanthera/AirportBrcmFixup/releases/latest',
+    'BrcmPatchRAM': 'https://github.com/acidanthera/BrcmPatchRAM/releases/latest',
+    'BT4LEContinuityFixup': 'https://github.com/acidanthera/BT4LEContinuityFixup/releases/latest',
+    'HibernationFixup': 'https://github.com/acidanthera/HibernationFixup/releases/latest',
+    'NoTouchID': 'https://github.com/al3xtjames/NoTouchID/releases/latest',
+    'PS2Controller': 'https://github.com/acidanthera/VoodooPS2/releases/latest',
+    'RealtekRTL8111': 'https://github.com/Mieze/RTL8111_driver_for_OS_X/releases/latest',
+    'USBInjectAll': 'https://github.com/Sniki/OS-X-USB-Inject-All/releases/latest',
+    
 }
 
-'''
-定义别名， 基本一样，特例一定要修改
-'''
-alias_kext_name = {
-    'PS2Controller': 'VoodooPS2Controller',
-}
-'''
-alias_kext_name = {
-    'AirportBrcmFixup': 'AirportBrcmFixup',
-    'AppleALC': 'AppleALC',
-    'BrcmPatchRAM': 'BrcmPatchRAM',
-    'BT4LEContinuityFixup': 'BT4LEContinuityFixup',
-    'HibernationFixup': 'HibernationFixup',
-    'Lilu': 'Lilu',
-    'NoTouchID': 'NoTouchID',
-    'PS2Controller': 'VoodooPS2Controller',
-    'RealtekRTL8111': 'RealtekRTL8111',
-    'USBInjectAll': 'USBInjectAll',
-    'VirtualSMC': 'VirtualSMC',
-    'WhateverGreen': 'WhateverGreen',
-    'OpenCore': 'OpenCore',
-}
-'''
 
 '''
 全局变量，存储下载的网页源文件
@@ -83,6 +60,7 @@ def get_internet_ver(url):
 
     global html
     html = response.text
+    # print (html)
     html = html.split("\n")
     ver = ""
     for ver in html:
@@ -150,35 +128,21 @@ def get_dowload_url(kext_name, v_type):
     global html
     if rst == True:
         for url in html:
-            tmp = url.upper()
-            if len(tmp) < 30:
-                continue
-            if v_type == '1':
-                if tmp.find('/DOWNLOAD/') != -1 and tmp.find('RELEASE.') != -1:
+            tmp = url.lower() # 临时字符串， 全部转换成小写
+            index = tmp.find('/download/') # 查找 ‘/download/’ 所在位置
+            if index != -1:
+                ss = ''
+                if v_type == '1':
+                    ss = 'release'
+                else:
+                    ss = 'debug'
+
+                if kext_name == 'RealtekRTL8111': # 特例 RealtekRTL8111 不分 debug 和 release 版本
+                    ss = '.zip'
+
+                if tmp.find(ss, index) != -1: # 在‘/download/’ 所在位置后 开始查找
                     url = base_url + url[url.find('"/') + 1:url.find('.zip') + 4]
                     return url
-            else:
-                if tmp.find('/DOWNLOAD/') != -1 and tmp.find('DEBUG.') != -1:
-                    url = base_url + url[url.find('"/') + 1:url.find('.zip') + 4]
-                    return url
-        return ''
-
-
-        ak_name = alias_kext_name.get(kext_name)
-        if ak_name is not None:
-            kext_name = ak_name
-        url = url + '/download/' + internet_ver + '/' + kext_name + '-' + internet_ver + '-RELEASE.zip'
-        # 特例
-        if kext_name == 'RealtekRTL8111':
-            url = url.replace('-RELEASE', '')
-        if kext_name == 'USBInjectAll':
-            if internet_ver.find('v') != -1:
-                ver = internet_ver.replace('v', 'v.')
-            if internet_ver.find('V') != -1:
-                ver = internet_ver.replace('V', 'V.')
-            url = dict_url[kext_name] + '/download/' + \
-                internet_ver + '/' + 'RELEASE-' + ver + '.zip'
-        return url
 
     return ''
 
