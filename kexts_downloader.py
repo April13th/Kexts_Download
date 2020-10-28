@@ -43,6 +43,7 @@ dict_url = {
     'PS2Controller': 'https://github.com/acidanthera/VoodooPS2/releases/latest',
     'RealtekRTL8111': 'https://github.com/Mieze/RTL8111_driver_for_OS_X/releases/latest',
     'USBInjectAll': 'https://github.com/Sniki/OS-X-USB-Inject-All/releases/latest',
+    'Black80211':'https://github.com/usr-sse2/Black80211-Catalina', # intel WiFi
     
 }
 
